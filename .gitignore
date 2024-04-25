@@ -1,32 +1,32 @@
-# eclipse
-bin
+# Eclipse
+/bin/
+*.settings
+*.metadata
+*.classpath
+*.project
+*.prefs
 *.launch
-.settings
-.metadata
-.classpath
-.project
 
-# idea
+# Idea
 out
 *.ipr
 *.iws
 *.iml
-.idea
-.vscode
+.idea/
 
-# gradle
-build
-.gradle
+# VsCode
+/.vscode/
+/.settings/
 
-# other
-/classes/
-eclipse
-run
-/test/
-/site/
-/logs/
-/libs/
-/libs-disabled/
+# Gradle
+.gradle/
+build/
 
-*.log
-cloc-1.86.exe
+# Used to store local only information like api keys and such
+/local/
+
+# General
+/*run/
+
+# Annotation Processing
+/.apt_generated_tests/

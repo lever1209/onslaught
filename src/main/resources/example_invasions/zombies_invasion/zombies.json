@@ -1,0 +1,64 @@
+{
+	"invasionID": "zombies", // there will be errors if multiple invasions have the same id
+	"title": "The Undead Horde of deepCurse",
+	"icon": "icon.png", // shown to the player in game on their gui, if no icon is provided there wil just be a simple bar without the icon hole
+	"location_hints": {
+		"spawn_point": 0.5,
+		"most_player_time": 0.2,
+		"farm": 0.3
+		// additional hints can always be added
+	},
+	"conditions": [ // all conditions are required to be true to proceed
+		{
+			"type": "all", // all, any, one, or none
+			"target_dimension": 0
+		}
+	],
+	"failure_conditions": [ // is this per player or for everyone? redefine the requirement for failing
+		{
+			"type": "all",
+			"target_wave_death_count": ">=5"
+		}
+	],
+	"waves": [
+		{
+			"import": "onslaught.waves.generic.prepare"
+		},
+		{
+			"import": "zombies.waves.one"
+		},
+		{
+			"events": [
+				{
+					"type": "command",
+					"command": "say Congrats on wave one!"
+				},
+				{
+					"type": "wait",
+					"real": "10s"
+				},
+				{
+					"type": "command",
+					"command": "say Now it's time to get serious."
+				},
+				{
+					"type": "wait",
+					"real": "5s"
+				}
+			]
+		},
+		{
+			"import": "zombies.waves.three", // imported data will always be processed first, then whatever else is in the block
+			"events": [
+				{
+					"type": "command",
+					"command": "say Damn! You have some serious skill."
+				},
+				{
+					"type": "command",
+					"command": "say You win this round, Rookie."
+				}
+			]
+		}
+	]
+}

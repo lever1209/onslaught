@@ -2,11 +2,11 @@ package com.codetaylor.mc.onslaught.modules.onslaught.capability;
 
 public interface IAntiAirPlayerData {
 
-  double getMotionY();
+	double getMotionY();
 
-  void setMotionY(double motionY);
+	void setMotionY(double motionY);
 
-  int getTicksOffGround();
+	int getTicksOffGround();
 
-  void setTicksOffGround(int value);
+	void setTicksOffGround(int value);
 }

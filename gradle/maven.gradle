@@ -1,0 +1,92 @@
+apply from: 'gradle/property_helper.gradle'
+apply plugin: 'maven-publish'
+
+def canLoad = true
+
+if (!project.hasProperty('mavenURL')) {
+	
+	canLoad = false;
+	project.logger.warn('Skipping maven module. mavenURL property not specified.')
+}
+
+if (!(project.hasProperty('mavenGroup') || project.hasProperty('mavenGroupId'))) {
+	
+	canLoad = false;
+	project.logger.warn('Skipping maven module. mavenGroup property not specified.')
+}
+
+if (canLoad) {
+	
+	project.logger.lifecycle('Loading maven module.')
+	
+	project.publishing {
+		
+		tasks.publish.dependsOn 'build'
+		
+		publications {
+			
+			mavenJava(MavenPublication) {
+				
+				from components.java
+				
+				artifactId project.archivesBaseName
+				group = project.ext.mavenGroup
+				
+//				println 'file ' + String.format("%s/libs/%s-%s-%s.jar.asc", project.layout.buildDirectory.getAsFile().get(), artifactId, project['version'], 'dev')
+				
+				// Base mod archive.
+//				artifact source: tasks['reobfJar']
+				artifact source: String.format("%s/libs/%s-%s.jar.asc", project.layout.buildDirectory.getAsFile().get(), artifactId, project['version'])
+				
+				// dev build
+//				artifact source: jar, classifier: 'dev'
+				artifact source: String.format("%s/libs/%s-%s-%s.jar.asc", project.layout.buildDirectory.getAsFile().get(), artifactId, project['version'], 'dev')
+				
+				// Adds the sources as an artifact.
+				artifact source: sourcesJar, classifier: 'sources'
+				artifact source: String.format("%s/libs/%s-%s-%s.jar.asc", project.layout.buildDirectory.getAsFile().get(), artifactId, project['version'], 'sources')
+				
+				// disabled for now
+//				// Adds the javadocs as an artifact.
+//				artifact source: javadocJar, classifier: 'javadoc'
+			}
+		}
+		
+		repositories {
+			
+			maven {
+				
+				// Sets maven credentials if they are provided. This is generally
+				// only used for external/remote uploads.
+				if (project.hasProperty('mavenUsername') && project.hasProperty('mavenPassword')) {
+					
+					credentials {
+						
+						username findProperty('mavenUsername')
+						password findProperty('mavenPassword')
+					}
+				}
+				
+				url getRequiredString('mavenURL')
+			}
+		}
+	}
+}
+
+def getMavenCoordinateString() {
+	
+	return "mavenGroup: '${project.ext.mavenGroup}', name: '${project.name}', version: '${project.version}'"
+}
+
+def getMavenCoordinateStringCompact() {
+	
+	return "${project.ext.mavenGroup}:${project.name}:${project.version}"
+}
+
+ext {
+	
+	getMavenCoordinateString = this.&getMavenCoordinateString
+	getMavenCoordinateStringCompact = this.&getMavenCoordinateStringCompact
+}
+
+//tasks['publish'].dependsOn tasks['publishMaven']

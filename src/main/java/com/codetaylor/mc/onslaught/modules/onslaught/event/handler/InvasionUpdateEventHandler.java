@@ -3,6 +3,7 @@ package com.codetaylor.mc.onslaught.modules.onslaught.event.handler;
 import com.codetaylor.mc.onslaught.modules.onslaught.invasion.InvasionGlobalSavedData;
 import com.codetaylor.mc.onslaught.modules.onslaught.lib.TickCounter;
 import com.codetaylor.mc.onslaught.modules.onslaught.lib.TickIntervalCounter;
+
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerList;
 import net.minecraft.world.World;
@@ -11,103 +12,95 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 /**
- * Responsible for hooking the overworld tick and calling the update method on all registered {@link
- * IInvasionUpdateComponent}s.
+ * Responsible for hooking the overworld tick and calling the update method on
+ * all registered {@link IInvasionUpdateComponent}s.
  */
 public class InvasionUpdateEventHandler {
 
-  /** The {@link IInvasionUpdateComponent}s to update. */
-  private final IInvasionUpdateComponent[] components;
-  private final TickIntervalCounter tickIntervalCounter;
+	/** The {@link IInvasionUpdateComponent}s to update. */
+	private final IInvasionUpdateComponent[] components;
+	private final TickIntervalCounter tickIntervalCounter;
 
-  public InvasionUpdateEventHandler(IInvasionUpdateComponent[] components) {
+	public InvasionUpdateEventHandler(IInvasionUpdateComponent[] components) {
 
-    this.components = components;
-    this.tickIntervalCounter = new TickIntervalCounter();
-  }
+		this.components = components;
+		this.tickIntervalCounter = new TickIntervalCounter();
+	}
 
-  @SubscribeEvent
-  public void on(TickEvent.WorldTickEvent event) {
+	@SubscribeEvent
+	public void on(TickEvent.WorldTickEvent event) {
 
-    World world = event.world;
+		World world = event.world;
 
-    if (world.isRemote) {
-      return;
-    }
+		if (world.isRemote) {
+			return;
+		}
 
-    if (event.phase != TickEvent.Phase.END) {
-      return;
-    }
+		if (event.phase != TickEvent.Phase.END) {
+			return;
+		}
 
-    if (world.provider.getDimension() != 0) {
-      return;
-    }
+		if (world.provider.getDimension() != 0) {
+			return;
+		}
 
-    if (!(world instanceof WorldServer)) {
-      return;
-    }
+		if (!(world instanceof WorldServer)) {
+			return;
+		}
 
-    MinecraftServer minecraftServer = world.getMinecraftServer();
+		MinecraftServer minecraftServer = world.getMinecraftServer();
 
-    // We check above if this is instance of WorldServer, shouldn't be null.
-    if (minecraftServer == null) {
-      return;
-    }
+		// We check above if this is instance of WorldServer, shouldn't be null.
+		if (minecraftServer == null) {
+			return;
+		}
 
-    InvasionGlobalSavedData invasionGlobalSavedData = InvasionGlobalSavedData.get(world);
-    PlayerList playerList = minecraftServer.getPlayerList();
-    long worldTime = world.getWorldTime();
-    int updateIntervalTicks = this.tickIntervalCounter.updateAndGet(1, worldTime);
+		InvasionGlobalSavedData invasionGlobalSavedData = InvasionGlobalSavedData.get(world);
+		PlayerList playerList = minecraftServer.getPlayerList();
+		long worldTime = world.getWorldTime();
+		int updateIntervalTicks = this.tickIntervalCounter.updateAndGet(1, worldTime);
 
-    for (IInvasionUpdateComponent component : this.components) {
-      component.update(updateIntervalTicks, invasionGlobalSavedData, playerList, worldTime);
-    }
-  }
+		for (IInvasionUpdateComponent component : this.components) {
+			component.update(updateIntervalTicks, invasionGlobalSavedData, playerList, worldTime);
+		}
+	}
 
-  /** An invasion component, updated on the Overworld's server tick. */
-  public interface IInvasionUpdateComponent {
+	/** An invasion component, updated on the Overworld's server tick. */
+	public interface IInvasionUpdateComponent {
 
-    void update(
-        int updateIntervalTicks,
-        InvasionGlobalSavedData invasionGlobalSavedData,
-        PlayerList playerList,
-        long worldTime);
-  }
+		void update(int updateIntervalTicks, InvasionGlobalSavedData invasionGlobalSavedData, PlayerList playerList,
+				long worldTime);
+	}
 
-  /**
-   * Responsible for wrapping an {@link IInvasionUpdateComponent} and providing updates only at the
-   * given tick interval.
-   */
-  public static class InvasionTimedUpdateComponent implements IInvasionUpdateComponent {
+	/**
+	 * Responsible for wrapping an {@link IInvasionUpdateComponent} and providing
+	 * updates only at the given tick interval.
+	 */
+	public static class InvasionTimedUpdateComponent implements IInvasionUpdateComponent {
 
-    private final int updateIntervalTicks;
+		private final int updateIntervalTicks;
 
-    private final IInvasionUpdateComponent invasionUpdateComponent;
-    private final TickCounter tickCounter;
+		private final IInvasionUpdateComponent invasionUpdateComponent;
+		private final TickCounter tickCounter;
 
-    private final TickIntervalCounter tickIntervalCounter;
+		private final TickIntervalCounter tickIntervalCounter;
 
-    public InvasionTimedUpdateComponent(
-        int updateIntervalTicks, IInvasionUpdateComponent invasionUpdateComponent) {
+		public InvasionTimedUpdateComponent(int updateIntervalTicks, IInvasionUpdateComponent invasionUpdateComponent) {
 
-      this.updateIntervalTicks = updateIntervalTicks;
-      this.invasionUpdateComponent = invasionUpdateComponent;
-      this.tickCounter = new TickCounter(this.updateIntervalTicks);
-      this.tickIntervalCounter = new TickIntervalCounter();
-    }
+			this.updateIntervalTicks = updateIntervalTicks;
+			this.invasionUpdateComponent = invasionUpdateComponent;
+			this.tickCounter = new TickCounter(this.updateIntervalTicks);
+			this.tickIntervalCounter = new TickIntervalCounter();
+		}
 
-    @Override
-    public void update(
-        int updateIntervalTicks,
-        InvasionGlobalSavedData invasionGlobalSavedData,
-        PlayerList playerList,
-        long worldTime) {
+		@Override
+		public void update(int updateIntervalTicks, InvasionGlobalSavedData invasionGlobalSavedData,
+				PlayerList playerList, long worldTime) {
 
-      if (this.tickCounter.increment(updateIntervalTicks)) {
-        int interval = this.tickIntervalCounter.updateAndGet(this.updateIntervalTicks, worldTime);
-        this.invasionUpdateComponent.update(
-            interval, invasionGlobalSavedData, playerList, worldTime);
-      }
-    }
-  }
+			if (this.tickCounter.increment(updateIntervalTicks)) {
+				int interval = this.tickIntervalCounter.updateAndGet(this.updateIntervalTicks, worldTime);
+				this.invasionUpdateComponent.update(interval, invasionGlobalSavedData, playerList, worldTime);
+			}
+		}
+	}
 }

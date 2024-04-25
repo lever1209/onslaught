@@ -1,0 +1,191 @@
+project.logger.lifecycle("Loading Forge project module.")
+
+buildscript {
+	repositories {
+		maven { 
+			name 'Official Forge Maven'
+			url 'https://maven.minecraftforge.net'
+		}
+		maven {
+			name 'Sponge / Mixin Maven'
+			url 'https://repo.spongepowered.org/repository/maven-public'
+		}
+		maven {
+			name 'GTNH Maven'
+			url 'https://nexus.gtnewhorizons.com/repository/public/'
+			mavenContent {
+				includeGroup 'com.gtnewhorizons'
+				includeGroup 'com.gtnewhorizons.retrofuturagradle'
+			}
+		}
+		mavenCentral()
+	}
+	
+	dependencies {
+		classpath 'com.gtnewhorizons:retrofuturagradle:1.3.33'
+		// classpath 'org.spongepowered:mixingradle:0.7-SNAPSHOT' // update to 0.7.38?
+	}
+}
+
+apply plugin: com.gtnewhorizons.retrofuturagradle.UserDevPlugin
+// apply plugin: org.spongepowered.asm.gradle.plugins.MixinGradlePlugin
+apply from: 'gradle/property_helper.gradle'
+
+// Configurable Forge Properties
+def forgeVersion = getRequiredString('forge_version')
+def clientRunDir = getDefaultString('forge_client_dir', 'run')
+def serverRunDir = getDefaultString('forge_server_dir', 'run')
+def loggingLevel = getDefaultString('forge_log_level', 'debug')
+def loggingANSI = getDefaultProperty('forge_log_ansi', 'true')
+def mappingChannel = getRequiredString('forge_mapping_channel')
+def mappingVersion = getRequiredString('forge_mapping_version')
+def coreModPluginPath = getRequiredString('forge_core_mod_class_path')
+
+archivesBaseName = "${mod_name}-${minecraft_version}"
+sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8'
+
+minecraft {
+	// sets the version of minecraft to load, this plugin only supports 1.12.2 and 1.7.10 apparently?
+	mcVersion = "${minecraft_version}"
+	mcpMappingChannel = mappingChannel
+	mcpMappingVersion = mappingVersion
+	tasks.runServer.workingDir = serverRunDir
+	tasks.runClient.workingDir = clientRunDir
+	useDependencyAccessTransformers = true
+	
+	username = project.ext.username
+	
+	def args = ["-ea:${project.group}"]
+	
+	// settings to aid development
+	args << '-Dmixin.hotSwap=true'
+	args << '-Dmixin.checks.interfaces=true'
+	args << '-Dmixin.debug.export=true'
+	args << '-Dforge.logging.console.level=' + loggingLevel
+	args << '-Dterminal.ansi=' + loggingANSI
+	
+	args << '-Dpkg.deepCurse.onslaught.debugMode=true'
+	
+	extraRunJvmArguments.addAll(args)
+}
+
+repositories {
+	//maven { // this wasnt working properly so i just decided to replace it entirely
+	//	name = 'CurseForge'
+	//	url = 'https://minecraft.curseforge.com/api/maven/'
+	//}
+	exclusiveContent {
+		forRepository {
+			maven {
+				url "https://cursemaven.com/"
+			}
+		}
+		filter {
+			includeGroup "curse.maven"
+		}
+	}
+	
+	maven { // find an alternative for mixin booter
+		name 'CleanroomMC Maven'
+		url 'https://maven.cleanroommc.com'
+	}
+
+	maven {
+		name 'Sponge / Mixin Maven'
+		url 'https://repo.spongepowered.org/maven'
+	}
+}
+
+dependencies {
+	// needed for mcp and mixins
+	annotationProcessor 'org.ow2.asm:asm-debug-all:5.2'
+	annotationProcessor 'com.google.guava:guava:24.1.1-jre'
+	annotationProcessor 'com.google.code.gson:gson:2.8.6'
+
+	// obtains mojang libs for minecraft
+	implementation 'com.cleanroommc:assetmover:2.5'
+	
+	// mixins
+	implementation 'zone.rong:mixinbooter:7.1'
+	String mixin = modUtils.enableMixins('org.spongepowered:mixin:0.8.3', "mixins.${archivesBaseName}.refmap.json")
+	api (mixin) {
+		transitive = false
+	}
+	annotationProcessor (mixin) {
+		transitive = false
+	}
+
+	// the curseforge id of athenaeum: 284350
+	// file version the old project was using: 3063275
+	// the newest file version available from codetaylor: 4633750
+	// <curse.maven>:<any string>-<project id>:<file id>
+	implementation rfg.deobf('curse.maven:athenaeum-284350:4633750')
+}
+
+processResources {
+	// This will ensure that this task is redone when the versions change
+	inputs.property 'version', project.version
+	inputs.property 'mcversion', project.mcVersion
+	
+	// Replace various properties in mcmod.info and pack.mcmeta if applicable
+	filesMatching(['mcmod.info', 'pack.mcmeta']) { fcd ->
+		fcd.expand (
+				'modId': project.modId,
+				'modName': project.modName,
+				'modDescription': project.modDescription,
+				'version': project.version,
+				'mcVersion': project.mcVersion,
+				'modHomepage': project.modHomepage,
+				'modAuthor': project.modAuthor,
+				'modCredits': project.modCredits
+		)
+	}
+	
+	rename '(.+_at\\.cfg)', 'META-INF/$1' // Make sure Access Transformer files are in META-INF folder
+}
+
+jar {
+	manifest {
+		attributes(['ModLoader': "forge-${forgeVersion}"])
+		attributes(['FMLCorePlugin': "${coreModPluginPath}"])
+		attributes(['FMLCorePluginContainsFMLMod': true])
+		attributes(['ForceLoadAsMod': true])
+		attributes(['FMLAT': project.modId + '_at.cfg'])
+		
+		attributes(['MixinConfigs': "${modId}.mixins.json"])
+	}
+}
+
+//mixin {
+//	// Tells the mixin plugin where to put the generated refmap file.
+//	add sourceSets.main, "mixins.${archivesBaseName}.refmap.json"
+//}
+
+// The plugin has no equivalent to this function here, ill have to find a new jar signer for if/when we need one
+//
+// Forge's Jar Signer
+//def canSignJar = project.hasProperty('keyStore') && project.hasProperty('keyStorePass') && project.hasProperty('keyStoreKeyPass') && project.hasProperty('keyStoreAlias')
+//task signJar(type: net.minecraftforge.gradle.common.task.SignJar, dependsOn: jar) {
+//	
+//	onlyIf {
+//	
+//		canSignJar
+//	}
+//	
+//	if (canSignJar) {
+//	
+//		keyStore = project.findProperty('keyStore')
+//		alias = project.findProperty('keyStoreAlias')
+//		storePass = project.findProperty('keyStorePass')
+//		keyPass = project.findProperty('keyStoreKeyPass')
+//		inputFile = jar.archivePath
+//		outputFile = jar.archivePath
+//		
+//		build.dependsOn signJar
+//	}
+//	
+//	else {
+//	
+//		project.logger.warn('Jar signing is disabled for this build. One or more keyStore properties are not specified.')
+//	}
+//}

@@ -1,61 +1,57 @@
 package com.codetaylor.mc.onslaught.modules.onslaught.capability;
 
 import javax.annotation.Nullable;
+
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraftforge.common.capabilities.Capability;
 
-public class AntiAirPlayerData
-    implements IAntiAirPlayerData, Capability.IStorage<IAntiAirPlayerData> {
+public class AntiAirPlayerData implements IAntiAirPlayerData, Capability.IStorage<IAntiAirPlayerData> {
 
-  private int ticksOffGround;
-  private double motionY;
+	private int ticksOffGround;
+	private double motionY;
 
-  @Override
-  public double getMotionY() {
+	@Override
+	public double getMotionY() {
 
-    return this.motionY;
-  }
+		return this.motionY;
+	}
 
-  @Override
-  public void setMotionY(double motionY) {
+	@Override
+	public void setMotionY(double motionY) {
 
-    this.motionY = motionY;
-  }
+		this.motionY = motionY;
+	}
 
-  @Override
-  public int getTicksOffGround() {
+	@Override
+	public int getTicksOffGround() {
 
-    return this.ticksOffGround;
-  }
+		return this.ticksOffGround;
+	}
 
-  @Override
-  public void setTicksOffGround(int value) {
+	@Override
+	public void setTicksOffGround(int value) {
 
-    this.ticksOffGround = value;
-  }
+		this.ticksOffGround = value;
+	}
 
-  // ---------------------------------------------------------------------------
-  // - Serialization
-  // -
-  // - This data is temporary and doesn't need to be serialized.
-  // ---------------------------------------------------------------------------
+	// ---------------------------------------------------------------------------
+	// - Serialization
+	// -
+	// - This data is temporary and doesn't need to be serialized.
+	// ---------------------------------------------------------------------------
 
-  @Nullable
-  @Override
-  public NBTBase writeNBT(
-      Capability<IAntiAirPlayerData> capability, IAntiAirPlayerData instance, EnumFacing side) {
+	@Nullable
+	@Override
+	public NBTBase writeNBT(Capability<IAntiAirPlayerData> capability, IAntiAirPlayerData instance, EnumFacing side) {
 
-    return new NBTTagCompound();
-  }
+		return new NBTTagCompound();
+	}
 
-  @Override
-  public void readNBT(
-      Capability<IAntiAirPlayerData> capability,
-      IAntiAirPlayerData instance,
-      EnumFacing side,
-      NBTBase nbt) {
-    //
-  }
+	@Override
+	public void readNBT(Capability<IAntiAirPlayerData> capability, IAntiAirPlayerData instance, EnumFacing side,
+			NBTBase nbt) {
+		//
+	}
 }

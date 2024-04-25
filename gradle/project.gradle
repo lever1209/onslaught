@@ -1,0 +1,50 @@
+// This file exists to contain anything specific to the project that would not belong in another module
+
+apply from: 'gradle/property_helper.gradle'
+
+dependencies {
+	
+	// implementation group: 'org.slf4j', name: 'slf4j-api', version: '2.0.12'
+	
+	testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.2'
+	testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.10.2'
+	testImplementation 'org.assertj:assertj-core:3.25.3'
+	testImplementation 'org.mockito:mockito-core:1.+'
+}
+
+test {
+	onlyIf {
+		var bool = getOptionalString('doTests').toBoolean()
+		if (!bool) {
+			project.logger.warn('Skipping tests. They are currently disabled in gradle.properties.')
+		}
+		bool
+	}
+	
+	useJUnitPlatform()
+}
+
+// when cleaning delete the run dirs
+clean {
+	doFirst {
+		println("Deleting the minecraft client and server working directories.")
+		delete tasks.runClient.workingDir
+		delete tasks.runServer.workingDir
+	}
+}
+
+// These task modifications make sure the templates folder is present when running the client or server
+tasks['runClient'].doFirst {
+	println "Copying templates to the client config directory."
+	copy {
+		from 'src/test/resources/config/templates'
+		into tasks.runClient.workingDir.toString() + '/config/onslaught/templates'
+	}
+}
+tasks['runServer'].doFirst {
+	println "Copying templates to the server config directory."
+	copy {
+		from 'src/test/resources/config/templates'
+		into tasks.runServer.workingDir.toString() + '/config/onslaught/templates'
+	}
+}

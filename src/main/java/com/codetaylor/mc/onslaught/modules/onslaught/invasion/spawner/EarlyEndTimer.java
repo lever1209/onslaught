@@ -1,17 +1,18 @@
 package com.codetaylor.mc.onslaught.modules.onslaught.invasion.spawner;
 
+import java.util.function.IntSupplier;
+
 import com.codetaylor.mc.onslaught.ModOnslaught;
 import com.codetaylor.mc.onslaught.modules.onslaught.ModuleOnslaughtConfig;
 import com.codetaylor.mc.onslaught.modules.onslaught.event.InvasionStateChangedEvent;
 import com.codetaylor.mc.onslaught.modules.onslaught.event.handler.InvasionUpdateEventHandler;
 import com.codetaylor.mc.onslaught.modules.onslaught.invasion.InvasionGlobalSavedData;
 import com.codetaylor.mc.onslaught.modules.onslaught.invasion.InvasionPlayerData;
+
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.management.PlayerList;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.common.MinecraftForge;
-
-import java.util.function.IntSupplier;
 
 /**
  * Responsible for updating the wave delay timers for all active invasions.
@@ -20,11 +21,13 @@ public class EarlyEndTimer implements InvasionUpdateEventHandler.IInvasionUpdate
 
 	private final IntSupplier invasionPlayerTimerValueSupplier;
 
-	public EarlyEndTimer(IntSupplier invasionPlayerTimerValueSupplier)
-	{this.invasionPlayerTimerValueSupplier = invasionPlayerTimerValueSupplier;}
+	public EarlyEndTimer(IntSupplier invasionPlayerTimerValueSupplier) {
+		this.invasionPlayerTimerValueSupplier = invasionPlayerTimerValueSupplier;
+	}
 
 	@Override
-	public void update(int updateIntervalTicks, InvasionGlobalSavedData invasionGlobalSavedData, PlayerList playerList, long worldTime) {
+	public void update(int updateIntervalTicks, InvasionGlobalSavedData invasionGlobalSavedData, PlayerList playerList,
+			long worldTime) {
 
 		for (EntityPlayerMP player : playerList.getPlayers()) {
 
@@ -45,16 +48,15 @@ public class EarlyEndTimer implements InvasionUpdateEventHandler.IInvasionUpdate
 			}
 
 			if (invasionData.getEarlyEndMessage() != null && !invasionData.getEarlyEndMessage().isEmpty()) {
-				TextComponentTranslation textComponentTranslation =
-						new TextComponentTranslation(invasionData.getEarlyEndMessage());
+				TextComponentTranslation textComponentTranslation = new TextComponentTranslation(
+						invasionData.getEarlyEndMessage());
 				player.sendMessage(textComponentTranslation);
 			}
 
 			if (invasionData.getTimeToEnd() == 0) {
 				invasionData.setTimeToEnd(-1);
-				MinecraftForge.EVENT_BUS.post(
-						new InvasionStateChangedEvent(player, InvasionPlayerData.EnumInvasionState.Active, InvasionPlayerData.EnumInvasionState.Waiting)
-				);
+				MinecraftForge.EVENT_BUS.post(new InvasionStateChangedEvent(player,
+						InvasionPlayerData.EnumInvasionState.Active, InvasionPlayerData.EnumInvasionState.Waiting));
 
 				data.setTicksUntilEligible(this.invasionPlayerTimerValueSupplier.getAsInt());
 				data.setInvasionState(InvasionPlayerData.EnumInvasionState.Waiting);
@@ -62,10 +64,8 @@ public class EarlyEndTimer implements InvasionUpdateEventHandler.IInvasionUpdate
 				invasionGlobalSavedData.markDirty();
 
 				if (ModuleOnslaughtConfig.DEBUG.INVASION_STATE) {
-					String message =
-							String.format("Set invasion state to %s for player %s", "Waiting", player.getName());
-					ModOnslaught.LOG.fine(message);
-					System.out.println(message);
+					ModOnslaught.LOG.debug(
+							"Set invasion state to " + data.getInvasionState() + " for player %s" + player.getName());
 				}
 			}
 		}

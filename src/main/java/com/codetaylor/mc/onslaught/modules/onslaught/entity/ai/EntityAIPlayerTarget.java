@@ -1,6 +1,7 @@
 package com.codetaylor.mc.onslaught.modules.onslaught.entity.ai;
 
 import java.util.function.Supplier;
+
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.EntityAIBase;
@@ -9,55 +10,54 @@ import net.minecraft.entity.player.EntityPlayer;
 /** Responsible for providing a persistent player target. */
 public class EntityAIPlayerTarget extends EntityAIBase {
 
-  private final EntityLiving taskOwner;
-  private final Supplier<EntityPlayer> playerSupplier;
+	private final EntityLiving taskOwner;
+	private final Supplier<EntityPlayer> playerSupplier;
 
-  private EntityPlayer targetPlayer;
+	private EntityPlayer targetPlayer;
 
-  public EntityAIPlayerTarget(EntityLiving taskOwner, Supplier<EntityPlayer> playerSupplier) {
+	public EntityAIPlayerTarget(EntityLiving taskOwner, Supplier<EntityPlayer> playerSupplier) {
 
-    this.taskOwner = taskOwner;
+		this.taskOwner = taskOwner;
 
-    this.playerSupplier = playerSupplier;
-    this.setMutexBits(0);
-  }
+		this.playerSupplier = playerSupplier;
+		this.setMutexBits(0);
+	}
 
-  @Override
-  public boolean shouldExecute() {
+	@Override
+	public boolean shouldExecute() {
 
-    EntityLivingBase attackTarget = this.taskOwner.getAttackTarget();
+		EntityLivingBase attackTarget = this.taskOwner.getAttackTarget();
 
-    // Don't run if we already have a target and the target is alive
-    if (attackTarget != null && attackTarget.isEntityAlive()) {
-      return false;
-    }
+		// Don't run if we already have a target and the target is alive
+		if (attackTarget != null && attackTarget.isEntityAlive()) {
+			return false;
+		}
 
-    this.targetPlayer = this.playerSupplier.get();
+		this.targetPlayer = this.playerSupplier.get();
 
-    // Ensure the target player exists
-    if (this.targetPlayer == null) {
-      return false;
-    }
+		// Ensure the target player exists
+		if (this.targetPlayer == null) {
+			return false;
+		}
 
-    if (!this.targetPlayer.isEntityAlive()) {
-      return false;
-    }
+		if (!this.targetPlayer.isEntityAlive()) {
+			return false;
+		}
 
-    // Ensure that the targeted player is in the same world as the mob
-    return this.taskOwner.world.provider.getDimension() == this.targetPlayer.world.provider
-        .getDimension();
-  }
+		// Ensure that the targeted player is in the same world as the mob
+		return this.taskOwner.world.provider.getDimension() == this.targetPlayer.world.provider.getDimension();
+	}
 
-  @Override
-  public void startExecuting() {
+	@Override
+	public void startExecuting() {
 
-    this.taskOwner.setAttackTarget(this.targetPlayer);
-    super.startExecuting();
-  }
+		this.taskOwner.setAttackTarget(this.targetPlayer);
+		super.startExecuting();
+	}
 
-  @Override
-  public boolean shouldContinueExecuting() {
+	@Override
+	public boolean shouldContinueExecuting() {
 
-    return false;
-  }
+		return false;
+	}
 }

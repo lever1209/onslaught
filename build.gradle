@@ -1,134 +1,67 @@
-buildscript {
-    repositories {
-        jcenter()
-        maven {
-            name = 'forge'
-            url = 'https://maven.minecraftforge.net/'
-        }
-        maven {
-            name = 'gradle plugins'
-            url = 'https://plugins.gradle.org/m2/'
-        }
-        maven {
-            name = 'CurseForge'
-            url = 'https://minecraft.curseforge.com/api/maven/'
-        }
-    }
-    dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
-    }
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'idea'
+apply from: 'gradle/property_helper.gradle'
+apply from: 'gradle/property_loader.gradle'
+
+// Load mod related properties
+ext.modName = getRequiredString('mod_name')
+ext.modAuthor = getRequiredString('mod_author')
+ext.modId = getRequiredString('mod_id')
+ext.modCredits = getDefaultString('mod_credits', ext.modAuthor)
+ext.modDescription = getOptionalString('mod_description')
+ext.modChangelog = getOptionalString('mod_changelog')
+ext.modHomepage = getOptionalString('mod_homepage')
+ext.modSource = getOptionalString('mod_source')
+ext.modIssues = getOptionalString('mod_issues')
+
+// Load Minecraft specific properties
+ext.mcVersion = getRequiredString('minecraft_version')
+ext.username = getDefaultString('minecraft_username', 'Developer')
+
+// Load local-only properties
+def config = new Properties()
+def propFile = new File('local/gradle.properties')
+if (propFile.canRead()) {
+	config.load(new FileInputStream(propFile))
+	for (Map.Entry property in config) {
+		ext[property.key.toString()] = property.value
+	}
 }
 
-apply plugin: 'net.minecraftforge.gradle.forge'
+// Load build-time modules
+apply from: 'gradle/build_number.gradle'
+apply from: 'gradle/common_manifest.gradle'
+apply from: 'gradle/common_artifacts.gradle'
+apply from: 'gradle/forge.gradle'
+apply from: 'gradle/minify_jsons.gradle'
+apply from: 'gradle/git_changelog.gradle'
 
-ext {
+// Load publishing modules
 
-    modid = 'onslaught'
+//apply from: 'gradle/maven.gradle'
+project.logger.lifecycle('the gradle/maven.gradle module is disabled and must be reworked')
+//apply from: 'gradle/curseforge.gradle'
+project.logger.lifecycle('the gradle/curseforge.gradle module is disabled and must be reworked')
+//apply from: 'gradle/modrinth.gradle'
+project.logger.lifecycle('the gradle/modrinth.gradle module is disabled and must be reworked')
+//apply from: 'gradle/github.gradle'
+project.logger.lifecycle('the gradle/github.gradle module is disabled and must be reworked')
+//apply from: 'gradle/version_checker.gradle'
+project.logger.lifecycle('the gradle/version_checker.gradle module is disabled and must be reworked')
+//apply from: 'gradle/signing.gradle'
+project.logger.lifecycle('the gradle/signing.gradle module is disabled and must be reworked')
 
-    forge = [
-            version: '1.12.2-14.23.5.2847'
-    ]
+// Load the old project build.gradle stuff
+// Also, this must be run AFTER the forge module since it modifies a task from that module
+apply from: 'gradle/project.gradle'
 
-    mappings = [
-            channel: 'snapshot',
-            version: 'snapshot_20171003'
-    ]
-}
+//for (Object i : configurations.reobfJarConfiguration.artifacts) {
+//	println i
+//}
 
-jar {
-    manifest {
-        attributes(
-            'Specification-Title'     : 'Onslaught',
-            'Specification-Vendor'    : 'Rebirth of the Night',
-            'Specification-Version'   : '1', // We are version 1 of ourselves
-            'Implementation-Title'    : project.name,
-            'Implementation-Version'  : "${version}",
-            'Implementation-Vendor'   : 'Rebirth of the Night',
-            'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
-            'FMLAT'                   : "onslaught_at.cfg"
-        )
-    }
-}
+//tasks.withType
 
-def getVersionName = { String workTree ->
-    def stdout = new ByteArrayOutputStream()
-    exec {
-        commandLine 'git', "--git-dir=${workTree}/.git", "--work-tree=${workTree}", 'describe', '--tags'
-        standardOutput = stdout
-    }
-    return stdout.toString().trim()
-}
-
-version = getVersionName("${project.projectDir}")
-group = 'com.codetaylor.mc.' + project.ext.modid
-archivesBaseName = project.ext.modid
-
-println("""
--------------------------------------------------------------
-- Mod Id:        ${project.ext.modid}
-- Version:       ${version}
-- Forge Version: ${project.ext.forge.version}
-- Mappings:      ${project.ext.mappings.channel} ${project.ext.mappings.version}
--------------------------------------------------------------
-""")
-
-compileJava {
-    sourceCompatibility = targetCompatibility = "1.8"
-}
-
-minecraft {
-    version = project.ext.forge.version
-    runDir = "run"
-    mappings = project.ext.mappings.version
-}
-
-repositories {
-    maven {
-        name = 'CurseForge'
-        url = 'https://minecraft.curseforge.com/api/maven/'
-    }
-}
-
-dependencies {
-    deobfCompile 'athenaeum:athenaeum:1.12.2:1.19.2'
-
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.2'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.10.2'
-    testImplementation 'org.assertj:assertj-core:3.25.3'
-    testImplementation 'org.mockito:mockito-core:1.+'
-}
-
-processResources {
-    // this will ensure that this task is redone when the versions change.
-    inputs.property "version", project.version
-    inputs.property "mcversion", project.minecraft.version
-
-    // replace stuff in mcmod.info, nothing else
-    from(sourceSets.main.resources.srcDirs) {
-        include 'mcmod.info'
-
-        // replace version and mcversion
-        expand 'version': project.version, 'mcversion': project.minecraft.version
-    }
-
-    // copy everything else, that's not the mcmod.info
-    from(sourceSets.main.resources.srcDirs) {
-        exclude 'mcmod.info'
-    }
-}
-
-clean {
-    delete minecraft.runDir
-}
-
-runClient.doFirst {
-    copy {
-        from 'src/test/resources/config/templates'
-        into 'run/config/onslaught/templates'
-    }
-}
-
-test {
-    useJUnitPlatform()
-}
-
+//for (Object i : tasks['reobfJar'].properties) {
+//	println i
+//}

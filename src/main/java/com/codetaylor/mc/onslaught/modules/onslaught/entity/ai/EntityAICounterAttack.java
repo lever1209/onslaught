@@ -12,77 +12,70 @@ import net.minecraft.util.math.MathHelper;
  */
 public class EntityAICounterAttack extends EntityAIBase {
 
-  private final EntityLiving taskOwner;
-  private final float leapMotionY;
-  private final float leapMotionXZ;
-  private final float chance;
-  private final float rangeMinSq;
-  private final float rangeMaxSq;
+	private final EntityLiving taskOwner;
+	private final float leapMotionY;
+	private final float leapMotionXZ;
+	private final float chance;
+	private final float rangeMinSq;
+	private final float rangeMaxSq;
 
-  private EntityLivingBase target;
-  private int revengeTimer;
+	private EntityLivingBase target;
+	private int revengeTimer;
 
-  public EntityAICounterAttack(
-      EntityLiving taskOwner,
-      float leapMotionXZ,
-      float leapMotionY,
-      float chance,
-      float rangeMin,
-      float rangeMax) {
+	public EntityAICounterAttack(EntityLiving taskOwner, float leapMotionXZ, float leapMotionY, float chance,
+			float rangeMin, float rangeMax) {
 
-    this.taskOwner = taskOwner;
-    this.leapMotionY = leapMotionY;
-    this.leapMotionXZ = leapMotionXZ;
-    this.chance = chance;
-    this.rangeMinSq = rangeMin * rangeMin;
-    this.rangeMaxSq = rangeMax * rangeMax;
-    this.setMutexBits(1 | 4);
-  }
+		this.taskOwner = taskOwner;
+		this.leapMotionY = leapMotionY;
+		this.leapMotionXZ = leapMotionXZ;
+		this.chance = chance;
+		this.rangeMinSq = rangeMin * rangeMin;
+		this.rangeMaxSq = rangeMax * rangeMax;
+		this.setMutexBits(1 | 4);
+	}
 
-  @Override
-  public boolean shouldExecute() {
+	@Override
+	public boolean shouldExecute() {
 
-    this.target = this.taskOwner.getRevengeTarget();
+		this.target = this.taskOwner.getRevengeTarget();
 
-    if (this.target == null) {
-      return false;
-    }
+		if (this.target == null) {
+			return false;
+		}
 
-    double distanceSq = this.taskOwner.getDistanceSq(this.target);
+		double distanceSq = this.taskOwner.getDistanceSq(this.target);
 
-    if (distanceSq < this.rangeMinSq || distanceSq > this.rangeMaxSq) {
-      return false;
-    }
+		if (distanceSq < this.rangeMinSq || distanceSq > this.rangeMaxSq) {
+			return false;
+		}
 
-    if (this.revengeTimer == this.taskOwner.getRevengeTimer()) {
-      return false;
-    }
+		if (this.revengeTimer == this.taskOwner.getRevengeTimer()) {
+			return false;
+		}
 
-    return (this.taskOwner.onGround && this.taskOwner.getRNG().nextFloat() <= this.chance);
-  }
+		return (this.taskOwner.onGround && this.taskOwner.getRNG().nextFloat() <= this.chance);
+	}
 
-  @Override
-  public boolean shouldContinueExecuting() {
+	@Override
+	public boolean shouldContinueExecuting() {
 
-    return !this.taskOwner.onGround;
-  }
+		return !this.taskOwner.onGround;
+	}
 
-  @Override
-  public void startExecuting() {
+	@Override
+	public void startExecuting() {
 
-    this.revengeTimer = this.taskOwner.getRevengeTimer();
+		this.revengeTimer = this.taskOwner.getRevengeTimer();
 
-    double dx = this.target.posX - this.taskOwner.posX;
-    double dz = this.target.posZ - this.taskOwner.posZ;
-    float distance = MathHelper.sqrt(dx * dx + dz * dz);
+		double dx = this.target.posX - this.taskOwner.posX;
+		double dz = this.target.posZ - this.taskOwner.posZ;
+		float distance = MathHelper.sqrt(dx * dx + dz * dz);
 
-    if ((double) distance >= 0.0001) {
-      this.taskOwner.motionX +=
-          dx / (double) distance * this.leapMotionXZ + this.taskOwner.motionX * 0.2;
-      this.taskOwner.motionZ +=
-          dz / (double) distance * this.leapMotionXZ + this.taskOwner.motionZ * 0.2;
-    }
+		if ((double) distance >= 0.0001) {
+			this.taskOwner.motionX += dx / (double) distance * this.leapMotionXZ + this.taskOwner.motionX * 0.2;
+			this.taskOwner.motionZ += dz / (double) distance * this.leapMotionXZ + this.taskOwner.motionZ * 0.2;
+		}
 
-    this.taskOwner.motionY = this.leapMotionY;
-  }
+		this.taskOwner.motionY = this.leapMotionY;
+	}
 }

@@ -5,6 +5,6 @@ package com.codetaylor.mc.onslaught.modules.onslaught.template.invasion;
  */
 public class InvasionTemplateEarlyEnd {
 
-  public int maxInvasionDuration = -1;
-  public String message = "";
+	public int maxInvasionDuration = -1;
+	public String message = "";
 }

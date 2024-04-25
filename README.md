@@ -1,3 +1,7 @@
+# THIS PROJECT IS UNDER A MASSIVE RESTRUCTURING, PLEASE DO NOT USE THIS IN PRODUCTION UNTIL STATED OTHERWISE IN THIS FILE!
+
+<!--
+
 # Onslaught
 
 *Onslaught* is a Minecraft Mod that gives you an interface to create Invasions of violent mobs with custom abilities, loot, and spawning conditions.
@@ -51,3 +55,5 @@ You should be good to build or run the client.
 1. Go to [Onslaught project's files](https://www.curseforge.com/minecraft/mc-mods/onslaught/files)
 2. Click the file upload button in the top right
 3. Follow the instructions
+
+-->

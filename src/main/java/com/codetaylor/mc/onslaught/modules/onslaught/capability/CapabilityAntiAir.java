@@ -6,11 +6,11 @@ import net.minecraftforge.common.capabilities.CapabilityInject;
 
 public class CapabilityAntiAir {
 
-  @CapabilityInject(IAntiAirPlayerData.class)
-  public static Capability<IAntiAirPlayerData> INSTANCE = null;
+	@CapabilityInject(IAntiAirPlayerData.class)
+	public static Capability<IAntiAirPlayerData> INSTANCE = null;
 
-  public static IAntiAirPlayerData get(EntityPlayer player) {
+	public static IAntiAirPlayerData get(EntityPlayer player) {
 
-    return player.getCapability(INSTANCE, null);
-  }
+		return player.getCapability(INSTANCE, null);
+	}
 }

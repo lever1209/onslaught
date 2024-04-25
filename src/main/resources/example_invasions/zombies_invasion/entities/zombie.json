@@ -1,0 +1,50 @@
+{
+	"export": "zombies.entities.zomboss",
+	// "spawn_animation": "./zombie_spawn_animation.json", // TODO eventually?
+	// TODO modified loot tables
+	"nbt": {
+		"CustomName": "Zomboss",
+		"Health": 10.0,
+		"PersistenceRequired": 1,
+		"HandItems": [
+			{
+				"Count": 1,
+				"id": "wooden_sword"
+			},
+			{
+				"Count": 1,
+				"id": "shield"
+			}
+		],
+		"HandDropChances": [
+			0.0,
+			0.0
+		],
+		"ActiveEffects": [
+			{
+				"Id": 5, // strength
+				"Amplifier": 0, // 1
+				"Duration": 999999, // infinite
+				"Ambient": 1 // no particle effects
+			},
+			{
+				"Id": 24, // glowing
+				"Amplifier": 0, // 1
+				"Duration": 999999, // infinite
+				"Ambient": 1 // no particle effects
+			}
+		],
+		"OnslaughtData": {
+			"AIModules": [
+				{
+					"Type": "counter_attack",
+					"Weight": 0.2 // how much the counter attack module will have control over the entity, what is it willing to override in order to achieve a counter attack
+				},
+				{
+					"Type": "shield_blocks",
+					"Weight": 0.5 // same story as above but for blocking incoming attacks, if set to 1, the mob will ALWAYS block incoming attacks and it may become unfair
+				}
+			]
+		}
+	}
+}

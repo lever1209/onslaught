@@ -1,7 +1,11 @@
 package com.codetaylor.mc.onslaught.modules.onslaught.template;
 
+import java.nio.file.Path;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
+
 import com.codetaylor.mc.onslaught.ModOnslaught;
-import com.codetaylor.mc.onslaught.modules.onslaught.ModuleOnslaught;
 import com.codetaylor.mc.onslaught.modules.onslaught.lib.FilePathCreator;
 import com.codetaylor.mc.onslaught.modules.onslaught.lib.JsonFileLocator;
 import com.codetaylor.mc.onslaught.modules.onslaught.template.invasion.InvasionTemplate;
@@ -10,112 +14,87 @@ import com.codetaylor.mc.onslaught.modules.onslaught.template.invasion.InvasionT
 import com.codetaylor.mc.onslaught.modules.onslaught.template.mob.MobTemplate;
 import com.codetaylor.mc.onslaught.modules.onslaught.template.mob.MobTemplateLoader;
 import com.codetaylor.mc.onslaught.modules.onslaught.template.mob.MobTemplateRegistry;
-import java.nio.file.Path;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Consumer;
-import java.util.logging.Level;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
-/** Responsible for loading mob templates and invasion templates into the data store. */
+/**
+ * Responsible for loading mob templates and invasion templates into the data
+ * store.
+ */
 public class TemplateLoader {
+	private final Consumer<MobTemplateRegistry> mobTemplateRegistryConsumer;
+	private final Consumer<InvasionTemplateRegistry> invasionTemplateRegistryConsumer;
+	private final Path path;
+	private final FilePathCreator filePathCreator;
+	private final JsonFileLocator jsonFileLocator;
+	private final MobTemplateLoader mobTemplateLoader;
+	private final InvasionTemplateLoader invasionTemplateLoader;
 
-  private static final Logger LOGGER = LogManager.getLogger(TemplateLoader.class);
+	public TemplateLoader(Consumer<MobTemplateRegistry> mobTemplateRegistryConsumer,
+			Consumer<InvasionTemplateRegistry> invasionTemplateRegistryConsumer, Path path,
+			FilePathCreator filePathCreator, JsonFileLocator jsonFileLocator, MobTemplateLoader mobTemplateLoader,
+			InvasionTemplateLoader invasionTemplateLoader) {
 
-  private final Consumer<MobTemplateRegistry> mobTemplateRegistryConsumer;
-  private final Consumer<InvasionTemplateRegistry> invasionTemplateRegistryConsumer;
-  private final Path path;
-  private final FilePathCreator filePathCreator;
-  private final JsonFileLocator jsonFileLocator;
-  private final MobTemplateLoader mobTemplateLoader;
-  private final InvasionTemplateLoader invasionTemplateLoader;
+		this.mobTemplateRegistryConsumer = mobTemplateRegistryConsumer;
+		this.invasionTemplateRegistryConsumer = invasionTemplateRegistryConsumer;
+		this.path = path;
+		this.filePathCreator = filePathCreator;
+		this.jsonFileLocator = jsonFileLocator;
+		this.mobTemplateLoader = mobTemplateLoader;
+		this.invasionTemplateLoader = invasionTemplateLoader;
+	}
 
-  public TemplateLoader(
-      Consumer<MobTemplateRegistry> mobTemplateRegistryConsumer,
-      Consumer<InvasionTemplateRegistry> invasionTemplateRegistryConsumer,
-      Path path,
-      FilePathCreator filePathCreator,
-      JsonFileLocator jsonFileLocator,
-      MobTemplateLoader mobTemplateLoader,
-      InvasionTemplateLoader invasionTemplateLoader) {
+	public boolean load() {
 
-    this.mobTemplateRegistryConsumer = mobTemplateRegistryConsumer;
-    this.invasionTemplateRegistryConsumer = invasionTemplateRegistryConsumer;
-    this.path = path;
-    this.filePathCreator = filePathCreator;
-    this.jsonFileLocator = jsonFileLocator;
-    this.mobTemplateLoader = mobTemplateLoader;
-    this.invasionTemplateLoader = invasionTemplateLoader;
-  }
+		return this.loadMobTemplateData() && this.loadInvasionTemplateData();
+	}
 
-  public boolean load() {
+	private boolean loadMobTemplateData() {
 
-    return this.loadMobTemplateData() && this.loadInvasionTemplateData();
-  }
+		Path mobTemplatePath = this.path.resolve(ModOnslaught.MOD_ID + "/templates/mob");
 
-  private boolean loadMobTemplateData() {
+		try {
+			long start = System.currentTimeMillis();
 
-    Path mobTemplatePath = this.path.resolve(ModuleOnslaught.MOD_ID + "/templates/mob");
+			this.filePathCreator.initialize(mobTemplatePath);
+			List<Path> jsonFilePaths = this.jsonFileLocator.locate(mobTemplatePath);
+			Map<String, MobTemplate> mobTemplateMap = this.mobTemplateLoader.load(jsonFilePaths);
+			MobTemplateRegistry mobTemplateRegistry = new MobTemplateRegistry(mobTemplateMap);
+			this.mobTemplateRegistryConsumer.accept(mobTemplateRegistry);
 
-    try {
-      long start = System.currentTimeMillis();
+			long elapsed = System.currentTimeMillis() - start;
 
-      this.filePathCreator.initialize(mobTemplatePath);
-      List<Path> jsonFilePaths = this.jsonFileLocator.locate(mobTemplatePath);
-      Map<String, MobTemplate> mobTemplateMap = this.mobTemplateLoader.load(jsonFilePaths);
-      MobTemplateRegistry mobTemplateRegistry = new MobTemplateRegistry(mobTemplateMap);
-      this.mobTemplateRegistryConsumer.accept(mobTemplateRegistry);
+			ModOnslaught.LOG.info(String.format("Loaded %d mob templates in %d ms", mobTemplateMap.size(), elapsed));
+			return true;
+		} catch (Exception e) {
+			ModOnslaught.LOG.error("Error loading mob template data");
+			ModOnslaught.LOG.error(e.getMessage(), e);
+		}
 
-      long elapsed = System.currentTimeMillis() - start;
+		return false;
+	}
 
-      ModOnslaught.LOG.info(
-          String.format(
-              "Loaded %d mob templates in %d ms", 
-              mobTemplateMap.size(), elapsed));
-      return true;
-    } catch (Exception e) {
-      String message = "Error loading mob template data";
+	private boolean loadInvasionTemplateData() {
 
-      ModOnslaught.LOG.log(Level.SEVERE, message);
-      ModOnslaught.LOG.log(Level.SEVERE, e.getMessage(), e);
-      LOGGER.error(message);
-      LOGGER.error(e.getMessage(), e);
-    }
+		Path invasionTemplatePath = this.path.resolve(ModOnslaught.MOD_ID + "/templates/invasion");
 
-    return false;
-  }
+		try {
+			long start = System.currentTimeMillis();
 
-  private boolean loadInvasionTemplateData() {
+			this.filePathCreator.initialize(invasionTemplatePath);
+			List<Path> jsonFilePaths = this.jsonFileLocator.locate(invasionTemplatePath);
+			Map<String, InvasionTemplate> invasionTemplateMap = this.invasionTemplateLoader.load(jsonFilePaths);
+			InvasionTemplateRegistry invasionTemplateRegistry = new InvasionTemplateRegistry(invasionTemplateMap);
+			this.invasionTemplateRegistryConsumer.accept(invasionTemplateRegistry);
 
-    Path invasionTemplatePath = this.path.resolve(ModuleOnslaught.MOD_ID + "/templates/invasion");
+			long elapsed = System.currentTimeMillis() - start;
 
-    try {
-      long start = System.currentTimeMillis();
+			ModOnslaught.LOG
+					.info(String.format("Loaded %d invasion templates in %d ms", invasionTemplateMap.size(), elapsed));
+			return true;
+		} catch (Exception e) {
+			ModOnslaught.LOG.error("Error loading invasion template data");
+			ModOnslaught.LOG.error(e.getMessage(), e);
+		}
 
-      this.filePathCreator.initialize(invasionTemplatePath);
-      List<Path> jsonFilePaths = this.jsonFileLocator.locate(invasionTemplatePath);
-      Map<String, InvasionTemplate> invasionTemplateMap =
-          this.invasionTemplateLoader.load(jsonFilePaths);
-      InvasionTemplateRegistry invasionTemplateRegistry =
-          new InvasionTemplateRegistry(invasionTemplateMap);
-      this.invasionTemplateRegistryConsumer.accept(invasionTemplateRegistry);
-
-      long elapsed = System.currentTimeMillis() - start;
-
-      ModOnslaught.LOG.info(
-          String.format(
-              "Loaded %d invasion templates in %d ms", invasionTemplateMap.size(), elapsed));
-      return true;
-    } catch (Exception e) {
-      String message = "Error loading invasion template data";
-
-      ModOnslaught.LOG.log(Level.SEVERE, message);
-      ModOnslaught.LOG.log(Level.SEVERE, e.getMessage(), e);
-      LOGGER.error(message);
-      LOGGER.error(e.getMessage(), e);
-    }
-
-    return false;
-  }
+		return false;
+	}
 }

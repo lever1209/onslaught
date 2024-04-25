@@ -1,0 +1,13 @@
+{
+	"export": "zombies.waves.one",
+	"events": [
+		{
+			"type": "spawn",
+			"entity": { "import": "zombies.entities.zomboss" },
+			"count": 15,
+			"placement": {
+				"import": "onslaught.placement.ground.normal"
+			}
+		}
+	]
+}

@@ -1,0 +1,14 @@
+{
+	"required": true,
+	"minVersion": "0.8",
+	"package": "pkg.deepCurse.onslaught",
+	"compatibilityLevel": "JAVA_8",
+	"client":[],
+	"mixins": [
+		"common.mixin.accessors.EntityPlayerMixin"
+	],
+	"server":[],
+	"injectors": {
+		"defaultRequire": 1
+	}
+}

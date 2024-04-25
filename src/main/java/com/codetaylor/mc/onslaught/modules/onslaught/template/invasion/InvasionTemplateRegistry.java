@@ -5,41 +5,45 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import javax.annotation.Nullable;
 
-/** Responsible for holding references to {@link InvasionTemplate}s and providing access to them. */
+/**
+ * Responsible for holding references to {@link InvasionTemplate}s and providing
+ * access to them.
+ */
 public class InvasionTemplateRegistry {
 
-  private final Map<String, InvasionTemplate> templateMap;
-  private final List<String> idList;
+	private final Map<String, InvasionTemplate> templateMap;
+	private final List<String> idList;
 
-  public InvasionTemplateRegistry(Map<String, InvasionTemplate> templateMap) {
+	public InvasionTemplateRegistry(Map<String, InvasionTemplate> templateMap) {
 
-    this.templateMap = templateMap;
-    List<String> idList = new ArrayList<>(this.templateMap.keySet());
-    Collections.sort(idList);
-    this.idList = Collections.unmodifiableList(idList);
-  }
+		this.templateMap = templateMap;
+		List<String> idList = new ArrayList<>(this.templateMap.keySet());
+		Collections.sort(idList);
+		this.idList = Collections.unmodifiableList(idList);
+	}
 
-  @Nullable
-  public InvasionTemplate get(String id) {
+	@Nullable
+	public InvasionTemplate get(String id) {
 
-    return this.templateMap.get(id);
-  }
+		return this.templateMap.get(id);
+	}
 
-  public boolean has(String id) {
+	public boolean has(String id) {
 
-    return this.templateMap.containsKey(id);
-  }
+		return this.templateMap.containsKey(id);
+	}
 
-  public Set<Map.Entry<String, InvasionTemplate>> getAll() {
+	public Set<Map.Entry<String, InvasionTemplate>> getAll() {
 
-    return Collections.unmodifiableMap(this.templateMap).entrySet();
-  }
+		return Collections.unmodifiableMap(this.templateMap).entrySet();
+	}
 
-  /** @return a list of all template ids for command tab completion */
-  public List<String> getIdList() {
+	/** @return a list of all template ids for command tab completion */
+	public List<String> getIdList() {
 
-    return this.idList;
-  }
+		return this.idList;
+	}
 }

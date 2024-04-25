@@ -1,0 +1,44 @@
+buildscript {
+    repositories {
+		gradlePluginPortal()
+    }
+    dependencies {
+        // classpath group: 'gradle.plugin.com.matthewprenger', name: 'CurseGradle', version: '1.4.0'
+    }
+}
+
+apply from: 'gradle/property_helper.gradle'
+
+// import com.modrinth.minotaur.dependencies.ModDependency
+
+def canLoad = true
+
+if (!project.hasProperty('modrinthToken')) {
+	canLoad = false;
+	project.logger.warn('Skipping modrinth module. modrinthToken property not specified.')
+}
+
+if (!project.hasProperty('modrinthProjectId')) {
+	canLoad = false;
+	project.logger.warn('Skipping modrinth module. modrinthProjectId property not specified.')
+}
+
+canLoad = false
+project.logger.warn('Skipping modrinth module. It is currently unfinished and not all of the project requirements are met.')
+
+if (canLoad) {
+	apply plugin: 'com.modrinth.minotaur' version "2.+"
+	// https://github.com/modrinth/minotaur
+	modrinth {
+		token = getRequiredString('modrinthToken')
+		projectId = getRequiredString('modrinthProjectId') // The ID of your Modrinth project. Slugs will not work.
+		versionNumber = project.version
+		versionName = project.modName
+		uploadFile = remapJar // Tells Minotaur to use the remapped jar
+		gameVersions = [ project.mcVersion ]
+		loaders = ['forge']
+		//	dependencies = [
+		//		new ModDependency('P7dR8mSH', 'required') // Creates a new required dependency on Fabric API
+		//	]
+	}
+}

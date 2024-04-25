@@ -10,46 +10,40 @@ import java.util.logging.LogRecord;
 /** Responsible for formatting log output. */
 public class LogFormatter extends Formatter {
 
-  private static final String LOG_FORMAT = "%1$s %2$s%n%4$s: %5$s%6$s%n";
-  private final Date date = new Date();
-  SimpleDateFormat dateFormat = new SimpleDateFormat("[HH:mm:ss.SSS]");
+	private static final String LOG_FORMAT = "%1$s %2$s%n%4$s: %5$s%6$s%n";
+	private final Date date = new Date();
+	SimpleDateFormat dateFormat = new SimpleDateFormat("[HH:mm:ss.SSS]");
 
-  @Override
-  public synchronized String format(LogRecord record) {
+	@Override
+	public synchronized String format(LogRecord record) {
 
-    this.date.setTime(record.getMillis());
-    String source;
+		this.date.setTime(record.getMillis());
+		String source;
 
-    if (record.getSourceClassName() != null) {
-      source = record.getSourceClassName();
+		if (record.getSourceClassName() != null) {
+			source = record.getSourceClassName();
 
-      if (record.getSourceMethodName() != null) {
-        source += " " + record.getSourceMethodName();
-      }
+			if (record.getSourceMethodName() != null) {
+				source += " " + record.getSourceMethodName();
+			}
 
-    } else {
-      source = record.getLoggerName();
-    }
+		} else {
+			source = record.getLoggerName();
+		}
 
-    String message = formatMessage(record);
-    String throwable = "";
+		String message = formatMessage(record);
+		String throwable = "";
 
-    if (record.getThrown() != null) {
-      StringWriter sw = new StringWriter();
-      PrintWriter pw = new PrintWriter(sw);
-      pw.println();
-      record.getThrown().printStackTrace(pw);
-      pw.close();
-      throwable = sw.toString();
-    }
+		if (record.getThrown() != null) {
+			StringWriter sw = new StringWriter();
+			PrintWriter pw = new PrintWriter(sw);
+			pw.println();
+			record.getThrown().printStackTrace(pw);
+			pw.close();
+			throwable = sw.toString();
+		}
 
-    return String.format(
-        LOG_FORMAT,
-        this.dateFormat.format(this.date),
-        source,
-        record.getLoggerName(),
-        record.getLevel(),
-        message,
-        throwable);
-  }
+		return String.format(LOG_FORMAT, this.dateFormat.format(this.date), source, record.getLoggerName(),
+				record.getLevel(), message, throwable);
+	}
 }

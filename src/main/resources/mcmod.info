@@ -1,21 +1,19 @@
 [
   {
-    "modid": "onslaught",
-    "name": "Onslaught",
-    "description": "An onslaught of mobs!",
+    "modid": "${modId}",
+    "name": "${modName}",
+    "description": "${modDescription}",
     "version": "${version}",
-    "mcversion": "${mcversion}",
-    "url": "https://github.com/Rebirth-of-the-Night/onslaught",
-    "updateUrl": "",
+    "mcversion": "${mcVersion}",
+    "url": "${modHomepage}",
+    "updateUrl": "${modHomepage}",
     "authorList": [
-      "codetaylor",
-      "SekretOne"
+      "deepCurse",
+      "${modAuthor}"
     ],
-    "credits": "",
-    "logoFile": "",
+    "credits": "${modCredits}",
+    "logoFile": "${modId}.ico",
     "screenshots": [],
-    "dependencies": [
-      "athenaeum"
-    ]
+    "dependencies": []
   }
 ]

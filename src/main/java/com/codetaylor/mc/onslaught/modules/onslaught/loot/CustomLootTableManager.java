@@ -1,6 +1,7 @@
 package com.codetaylor.mc.onslaught.modules.onslaught.loot;
 
 import java.io.File;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
@@ -12,46 +13,46 @@ import net.minecraft.world.storage.loot.LootTable;
 import net.minecraft.world.storage.loot.LootTableManager;
 
 /**
- * Responsible for checking a custom folder for loot tables and deferring to the default MC {@link
- * LootTableManager} if no loot table is found.
+ * Responsible for checking a custom folder for loot tables and deferring to the
+ * default MC {@link LootTableManager} if no loot table is found.
  */
 public class CustomLootTableManager extends LootTableManager {
 
-  private final LootTableManager lootTableManager;
-  private final boolean initialized;
+	private final LootTableManager lootTableManager;
+	private final boolean initialized;
 
-  public CustomLootTableManager(@Nullable File folder, LootTableManager lootTableManager) {
+	public CustomLootTableManager(@Nullable File folder, LootTableManager lootTableManager) {
 
-    super(folder);
-    this.lootTableManager = lootTableManager;
-    this.initialized = true;
-    this.reloadLootTables();
-  }
+		super(folder);
+		this.lootTableManager = lootTableManager;
+		this.initialized = true;
+		this.reloadLootTables();
+	}
 
-  @Nonnull
-  @Override
-  public LootTable getLootTableFromLocation(@Nonnull ResourceLocation resourceLocation) {
+	@Nonnull
+	@Override
+	public LootTable getLootTableFromLocation(@Nonnull ResourceLocation resourceLocation) {
 
-    LootTable lootTable = super.getLootTableFromLocation(resourceLocation);
+		LootTable lootTable = super.getLootTableFromLocation(resourceLocation);
 
-    if (lootTable == LootTable.EMPTY_LOOT_TABLE) {
-      return this.lootTableManager.getLootTableFromLocation(resourceLocation);
-    }
+		if (lootTable == LootTable.EMPTY_LOOT_TABLE) {
+			return this.lootTableManager.getLootTableFromLocation(resourceLocation);
+		}
 
-    return lootTable;
-  }
+		return lootTable;
+	}
 
-  @Override
-  public void reloadLootTables() {
+	@Override
+	public void reloadLootTables() {
 
-    if (this.initialized) {
-      super.reloadLootTables();
+		if (this.initialized) {
+			super.reloadLootTables();
 
-      try {
-        this.lootTableManager.reloadLootTables();
-      } catch (JsonSyntaxException e) {
-        ModOnslaught.LOG.warning(e.getMessage());
-      }
-    }
-  }
+			try {
+				this.lootTableManager.reloadLootTables();
+			} catch (JsonSyntaxException e) {
+				ModOnslaught.LOG.warn(e.getMessage());
+			}
+		}
+	}
 }

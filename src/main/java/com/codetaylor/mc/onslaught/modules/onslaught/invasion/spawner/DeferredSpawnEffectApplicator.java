@@ -1,125 +1,117 @@
 package com.codetaylor.mc.onslaught.modules.onslaught.invasion.spawner;
 
-import com.codetaylor.mc.onslaught.ModOnslaught;
-import com.codetaylor.mc.onslaught.modules.onslaught.event.handler.InvasionUpdateEventHandler;
-import com.codetaylor.mc.onslaught.modules.onslaught.invasion.InvasionGlobalSavedData;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.IntSupplier;
 import java.util.function.Supplier;
-import java.util.logging.Level;
+
+import com.codetaylor.mc.onslaught.ModOnslaught;
+import com.codetaylor.mc.onslaught.modules.onslaught.event.handler.InvasionUpdateEventHandler;
+import com.codetaylor.mc.onslaught.modules.onslaught.invasion.InvasionGlobalSavedData;
+
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.server.management.PlayerList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
-/** Responsible for applying potion effects to players within range of a deferred spawn location. */
-public class DeferredSpawnEffectApplicator
-    implements InvasionUpdateEventHandler.IInvasionUpdateComponent {
+/**
+ * Responsible for applying potion effects to players within range of a deferred
+ * spawn location.
+ */
+public class DeferredSpawnEffectApplicator implements InvasionUpdateEventHandler.IInvasionUpdateComponent {
 
-  private final List<DeferredSpawnData> deferredSpawnDataList;
-  private final Supplier<List<Potion>> effectListSupplier;
-  private final IntSupplier effectDurationSupplier;
-  private final IntSupplier effectRangeSupplier;
+	private final List<DeferredSpawnData> deferredSpawnDataList;
+	private final Supplier<List<Potion>> effectListSupplier;
+	private final IntSupplier effectDurationSupplier;
+	private final IntSupplier effectRangeSupplier;
 
-  public DeferredSpawnEffectApplicator(
-      List<DeferredSpawnData> deferredSpawnDataList,
-      Supplier<List<Potion>> effectListSupplier,
-      IntSupplier effectDurationSupplier,
-      IntSupplier effectRangeSupplier) {
+	public DeferredSpawnEffectApplicator(List<DeferredSpawnData> deferredSpawnDataList,
+			Supplier<List<Potion>> effectListSupplier, IntSupplier effectDurationSupplier,
+			IntSupplier effectRangeSupplier) {
 
-    this.deferredSpawnDataList = deferredSpawnDataList;
-    this.effectListSupplier = effectListSupplier;
-    this.effectDurationSupplier = effectDurationSupplier;
-    this.effectRangeSupplier = effectRangeSupplier;
-  }
+		this.deferredSpawnDataList = deferredSpawnDataList;
+		this.effectListSupplier = effectListSupplier;
+		this.effectDurationSupplier = effectDurationSupplier;
+		this.effectRangeSupplier = effectRangeSupplier;
+	}
 
-  @Override
-  public void update(
-      int updateIntervalTicks,
-      InvasionGlobalSavedData invasionGlobalSavedData,
-      PlayerList playerList,
-      long worldTime) {
+	@Override
+	public void update(int updateIntervalTicks, InvasionGlobalSavedData invasionGlobalSavedData, PlayerList playerList,
+			long worldTime) {
 
-    if (this.deferredSpawnDataList.isEmpty()) {
-      return;
-    }
+		if (this.deferredSpawnDataList.isEmpty()) {
+			return;
+		}
 
-    List<Potion> effectList = this.effectListSupplier.get();
+		List<Potion> effectList = this.effectListSupplier.get();
 
-    if (effectList.isEmpty()) {
-      return;
-    }
+		if (effectList.isEmpty()) {
+			return;
+		}
 
-    int effectRange = this.effectRangeSupplier.getAsInt();
+		int effectRange = this.effectRangeSupplier.getAsInt();
 
-    if (effectRange == 0) {
-      return;
-    }
+		if (effectRange == 0) {
+			return;
+		}
 
-    int effectRangeSq = effectRange * effectRange;
+		int effectRangeSq = effectRange * effectRange;
 
-    int effectDuration = this.effectDurationSupplier.getAsInt();
+		int effectDuration = this.effectDurationSupplier.getAsInt();
 
-    if (effectDuration == 0) {
-      return;
-    }
+		if (effectDuration == 0) {
+			return;
+		}
 
-    for (EntityPlayerMP player : playerList.getPlayers()) {
+		for (EntityPlayerMP player : playerList.getPlayers()) {
 
-      for (DeferredSpawnData data : this.deferredSpawnDataList) {
+			for (DeferredSpawnData data : this.deferredSpawnDataList) {
 
-        if (player.world.provider.getDimension() == data.getDimensionId()
-            && player.getDistanceSq(data.getEntityLiving()) <= effectRangeSq) {
+				if (player.world.provider.getDimension() == data.getDimensionId()
+						&& player.getDistanceSq(data.getEntityLiving()) <= effectRangeSq) {
 
-          for (Potion potion : effectList) {
-            player.addPotionEffect(new PotionEffect(potion, effectDuration));
-          }
-        }
-      }
-    }
-  }
+					for (Potion potion : effectList) {
+						player.addPotionEffect(new PotionEffect(potion, effectDuration));
+					}
+				}
+			}
+		}
+	}
 
-  public static class EffectListSupplier implements Supplier<List<Potion>> {
+	public static class EffectListSupplier implements Supplier<List<Potion>> {
 
-    private static final Logger LOGGER = LogManager.getLogger(EffectListSupplier.class);
+		private final String[] effects;
 
-    private final String[] effects;
+		private List<Potion> potionList;
 
-    private List<Potion> potionList;
+		public EffectListSupplier(String[] effects) {
 
-    public EffectListSupplier(String[] effects) {
+			this.effects = effects;
+		}
 
-      this.effects = effects;
-    }
+		@Override
+		public List<Potion> get() {
 
-    @Override
-    public List<Potion> get() {
+			if (this.potionList == null) {
+				this.potionList = new ArrayList<>();
 
-      if (this.potionList == null) {
-        this.potionList = new ArrayList<>();
+				for (String effect : this.effects) {
 
-        for (String effect : this.effects) {
+					ResourceLocation resourceLocation = new ResourceLocation(effect);
+					Potion potion = ForgeRegistries.POTIONS.getValue(resourceLocation);
 
-          ResourceLocation resourceLocation = new ResourceLocation(effect);
-          Potion potion = ForgeRegistries.POTIONS.getValue(resourceLocation);
+					if (potion == null) {
+						String message = "Unknown forced spawn effect id: " + resourceLocation;
+						ModOnslaught.LOG.error(message);
+					} else {
+						this.potionList.add(potion);
+					}
+				}
+			}
 
-          if (potion == null) {
-            String message = "Unknown forced spawn effect id: " + resourceLocation;
-            ModOnslaught.LOG.log(Level.SEVERE, message);
-            LOGGER.error(message);
-
-          } else {
-            this.potionList.add(potion);
-          }
-        }
-      }
-
-      return this.potionList;
-    }
-  }
+			return this.potionList;
+		}
+	}
 }

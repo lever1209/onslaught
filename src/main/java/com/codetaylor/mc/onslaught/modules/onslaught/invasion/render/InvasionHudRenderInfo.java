@@ -4,7 +4,7 @@ import java.util.UUID;
 
 public class InvasionHudRenderInfo {
 
-  public UUID playerUuid;
-  public String invasionName;
-  public float invasionCompletionPercentage;
+	public UUID playerUuid;
+	public String invasionName;
+	public float invasionCompletionPercentage;
 }

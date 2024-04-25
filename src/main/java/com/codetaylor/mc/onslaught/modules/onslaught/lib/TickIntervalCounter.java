@@ -2,40 +2,41 @@ package com.codetaylor.mc.onslaught.modules.onslaught.lib;
 
 public class TickIntervalCounter {
 
-  /** Stores the previous world time, or -1 if first tick. */
-  private long previousWorldTime;
+	/** Stores the previous world time, or -1 if first tick. */
+	private long previousWorldTime;
 
-  public TickIntervalCounter() {
+	public TickIntervalCounter() {
 
-    this.previousWorldTime = -1;
-  }
+		this.previousWorldTime = -1;
+	}
 
-  /**
-   * This tracks the previous world time and uses it to derive the number of actual ticks passed.
-   * This will account for any changes made to world time via the /time add X command and sleeping.
-   *
-   * @param updateIntervalTicks the update interval in ticks
-   * @param worldTime the current world time
-   * @return the number of actual interval ticks
-   */
-  public int updateAndGet(int updateIntervalTicks, long worldTime) {
+	/**
+	 * This tracks the previous world time and uses it to derive the number of
+	 * actual ticks passed. This will account for any changes made to world time via
+	 * the /time add X command and sleeping.
+	 *
+	 * @param updateIntervalTicks the update interval in ticks
+	 * @param worldTime           the current world time
+	 * @return the number of actual interval ticks
+	 */
+	public int updateAndGet(int updateIntervalTicks, long worldTime) {
 
-    int updateTicks;
+		int updateTicks;
 
-    if (this.previousWorldTime == -1) {
-      updateTicks = updateIntervalTicks;
+		if (this.previousWorldTime == -1) {
+			updateTicks = updateIntervalTicks;
 
-    } else {
-      int amount = (int) (worldTime - this.previousWorldTime);
+		} else {
+			int amount = (int) (worldTime - this.previousWorldTime);
 
-      if (amount < 0) {
-        amount = 0;
-      }
+			if (amount < 0) {
+				amount = 0;
+			}
 
-      updateTicks = amount;
-    }
+			updateTicks = amount;
+		}
 
-    this.previousWorldTime = worldTime;
-    return updateTicks;
-  }
+		this.previousWorldTime = worldTime;
+		return updateTicks;
+	}
 }

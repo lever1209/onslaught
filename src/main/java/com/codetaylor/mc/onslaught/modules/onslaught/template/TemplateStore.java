@@ -1,50 +1,53 @@
 package com.codetaylor.mc.onslaught.modules.onslaught.template;
 
-import com.codetaylor.mc.onslaught.modules.onslaught.template.invasion.InvasionTemplateRegistry;
-import com.codetaylor.mc.onslaught.modules.onslaught.template.mob.MobTemplateRegistry;
 import java.util.Collections;
 
-/** Responsible for holding references to mob templates and invasion templates. */
+import com.codetaylor.mc.onslaught.modules.onslaught.template.invasion.InvasionTemplateRegistry;
+import com.codetaylor.mc.onslaught.modules.onslaught.template.mob.MobTemplateRegistry;
+
+/**
+ * Responsible for holding references to mob templates and invasion templates.
+ */
 public class TemplateStore {
 
-  private MobTemplateRegistry mobTemplateRegistry;
-  private InvasionTemplateRegistry invasionTemplateRegistry;
+	private MobTemplateRegistry mobTemplateRegistry;
+	private InvasionTemplateRegistry invasionTemplateRegistry;
 
-  public TemplateStore() {
+	public TemplateStore() {
 
-    this.setMobTemplateRegistry(new MobTemplateRegistry(Collections.emptyMap()));
-    this.setInvasionTemplateRegistry(new InvasionTemplateRegistry(Collections.emptyMap()));
-  }
+		this.setMobTemplateRegistry(new MobTemplateRegistry(Collections.emptyMap()));
+		this.setInvasionTemplateRegistry(new InvasionTemplateRegistry(Collections.emptyMap()));
+	}
 
-  /**
-   * The {@link MobTemplateRegistry} returned by this method should not be cached as it will change
-   * when the templates are reloaded.
-   *
-   * @return the {@link MobTemplateRegistry}
-   */
-  public MobTemplateRegistry getMobTemplateRegistry() {
+	/**
+	 * The {@link MobTemplateRegistry} returned by this method should not be cached
+	 * as it will change when the templates are reloaded.
+	 *
+	 * @return the {@link MobTemplateRegistry}
+	 */
+	public MobTemplateRegistry getMobTemplateRegistry() {
 
-    return this.mobTemplateRegistry;
-  }
+		return this.mobTemplateRegistry;
+	}
 
-  public void setMobTemplateRegistry(MobTemplateRegistry mobTemplateRegistry) {
+	public void setMobTemplateRegistry(MobTemplateRegistry mobTemplateRegistry) {
 
-    this.mobTemplateRegistry = mobTemplateRegistry;
-  }
+		this.mobTemplateRegistry = mobTemplateRegistry;
+	}
 
-  /**
-   * The {@link InvasionTemplateRegistry} returned by this method should not be cached as it will
-   * change when the templates are reloaded.
-   *
-   * @return the {@link InvasionTemplateRegistry}
-   */
-  public InvasionTemplateRegistry getInvasionTemplateRegistry() {
+	/**
+	 * The {@link InvasionTemplateRegistry} returned by this method should not be
+	 * cached as it will change when the templates are reloaded.
+	 *
+	 * @return the {@link InvasionTemplateRegistry}
+	 */
+	public InvasionTemplateRegistry getInvasionTemplateRegistry() {
 
-    return this.invasionTemplateRegistry;
-  }
+		return this.invasionTemplateRegistry;
+	}
 
-  public void setInvasionTemplateRegistry(InvasionTemplateRegistry invasionTemplateRegistry) {
+	public void setInvasionTemplateRegistry(InvasionTemplateRegistry invasionTemplateRegistry) {
 
-    this.invasionTemplateRegistry = invasionTemplateRegistry;
-  }
+		this.invasionTemplateRegistry = invasionTemplateRegistry;
+	}
 }

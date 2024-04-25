@@ -1,0 +1,15 @@
+jar {
+	manifest {
+		attributes([
+			'Timestamp'					: System.currentTimeMillis(),
+			'Specification-Title'		: project.ext.modName,
+			'Specification-Vendor'		: project.ext.modAuthor,
+			'Specification-Version'		: project.version, // why is this just '1' in the previous version of onslaught? we can override it here to match but its worth questioning
+			'Implementation-Title'		: project.ext.modName, // could be mod id instead to match the previous meta data of onslaught
+			'Implementation-Version'	: project.version,
+			'Implementation-Vendor'		: project.ext.modAuthor,
+			'Implementation-Timestamp'	: new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
+			'Built-On-Java'				: "${System.getProperty('java.vm.version')} (${System.getProperty('java.vm.vendor')})",
+		])
+	}
+}

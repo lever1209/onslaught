@@ -1,67 +1,65 @@
 package com.codetaylor.mc.onslaught.modules.onslaught.invasion;
 
-import com.codetaylor.mc.onslaught.modules.onslaught.ModuleOnslaught;
-import com.codetaylor.mc.onslaught.modules.onslaught.invasion.render.InvasionHudRenderInfo;
-import com.codetaylor.mc.onslaught.modules.onslaught.packet.SCPacketHudUpdate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.IntSupplier;
+
+import com.codetaylor.mc.onslaught.modules.onslaught.ModuleOnslaught;
+import com.codetaylor.mc.onslaught.modules.onslaught.invasion.render.InvasionHudRenderInfo;
+import com.codetaylor.mc.onslaught.modules.onslaught.packet.SCPacketHudUpdate;
+
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.world.World;
 
 public class InvasionClientHUDUpdateSender {
 
-  private final IntSupplier rangeSupplier;
-  private final InvasionCompletionPercentageCalculator invasionCompletionPercentageCalculator;
+	private final IntSupplier rangeSupplier;
+	private final InvasionCompletionPercentageCalculator invasionCompletionPercentageCalculator;
 
-  public InvasionClientHUDUpdateSender(
-      IntSupplier rangeSupplier,
-      InvasionCompletionPercentageCalculator invasionCompletionPercentageCalculator) {
+	public InvasionClientHUDUpdateSender(IntSupplier rangeSupplier,
+			InvasionCompletionPercentageCalculator invasionCompletionPercentageCalculator) {
 
-    this.rangeSupplier = rangeSupplier;
-    this.invasionCompletionPercentageCalculator = invasionCompletionPercentageCalculator;
-  }
+		this.rangeSupplier = rangeSupplier;
+		this.invasionCompletionPercentageCalculator = invasionCompletionPercentageCalculator;
+	}
 
-  public void update(List<EntityPlayerMP> players) {
+	public void update(List<EntityPlayerMP> players) {
 
-    int range = this.rangeSupplier.getAsInt();
-    int rangeSq = range * range;
+		int range = this.rangeSupplier.getAsInt();
+		int rangeSq = range * range;
 
-    for (EntityPlayerMP player : players) {
+		for (EntityPlayerMP player : players) {
 
-      World world = player.world;
+			World world = player.world;
 
-      List<EntityPlayerMP> playersNearby =
-          world.getEntities(
-              EntityPlayerMP.class,
-              entity -> entity != null && entity.getDistanceSq(player) <= rangeSq);
+			List<EntityPlayerMP> playersNearby = world.getEntities(EntityPlayerMP.class,
+					entity -> entity != null && entity.getDistanceSq(player) <= rangeSq);
 
-      InvasionGlobalSavedData invasionGlobalSavedData = InvasionGlobalSavedData.get(world);
-      List<InvasionHudRenderInfo> infoList = new ArrayList<>(playersNearby.size());
+			InvasionGlobalSavedData invasionGlobalSavedData = InvasionGlobalSavedData.get(world);
+			List<InvasionHudRenderInfo> infoList = new ArrayList<>(playersNearby.size());
 
-      for (EntityPlayerMP entityPlayerMP : playersNearby) {
-        InvasionPlayerData playerData =
-            invasionGlobalSavedData.getPlayerData(entityPlayerMP.getUniqueID());
+			for (EntityPlayerMP entityPlayerMP : playersNearby) {
+				InvasionPlayerData playerData = invasionGlobalSavedData.getPlayerData(entityPlayerMP.getUniqueID());
 
-        if (playerData.getInvasionState() != InvasionPlayerData.EnumInvasionState.Active) {
-          continue;
-        }
+				if (playerData.getInvasionState() != InvasionPlayerData.EnumInvasionState.Active) {
+					continue;
+				}
 
-        InvasionPlayerData.InvasionData invasionData = playerData.getInvasionData();
+				InvasionPlayerData.InvasionData invasionData = playerData.getInvasionData();
 
-        if (invasionData == null) {
-          continue;
-        }
+				if (invasionData == null) {
+					continue;
+				}
 
-        InvasionHudRenderInfo info = new InvasionHudRenderInfo();
-        info.playerUuid = entityPlayerMP.getUniqueID();
-        info.invasionCompletionPercentage =
-            this.invasionCompletionPercentageCalculator.calculate(playerData.getInvasionData());
-        info.invasionName = invasionData.getInvasionName();
-        infoList.add(info);
-      }
+				InvasionHudRenderInfo info = new InvasionHudRenderInfo();
+				info.playerUuid = entityPlayerMP.getUniqueID();
+				info.invasionCompletionPercentage = this.invasionCompletionPercentageCalculator
+						.calculate(playerData.getInvasionData());
+				info.invasionName = invasionData.getInvasionName();
+				infoList.add(info);
+			}
 
-      ModuleOnslaught.PACKET_SERVICE.sendTo(new SCPacketHudUpdate(infoList), player);
-    }
-  }
+			ModuleOnslaught.PACKET_SERVICE.sendTo(new SCPacketHudUpdate(infoList), player);
+		}
+	}
 }
